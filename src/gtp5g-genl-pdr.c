@@ -452,7 +452,7 @@ static int genl_gtp5g_attr_list_cb(const struct nlmsghdr *nlh, void *data)
             if (f_teid_tb[GTP5G_F_TEID_GTPU_ADDR_IPV4]) {
                 ipv4->s_addr = mnl_attr_get_u32(f_teid_tb[GTP5G_F_TEID_GTPU_ADDR_IPV4]);
                 inet_ntop(AF_INET, ipv4, buf, sizeof(buf));
-                printf("%s%s%s- UPF IPv4: %s\n", indent_str, indent_str, indent_str, buf);
+                printf("%s%s%s- Local GTP-U IPv4: %s\n", indent_str, indent_str, indent_str, buf);
             }
         }
 
@@ -634,7 +634,7 @@ void gtp5g_print_pdr(struct gtp5g_pdr *pdr)
             printf("%s%s%s- In Teid: %u\n", indent_str, indent_str, indent_str, f_teid->teid);
 
             inet_ntop(AF_INET, &f_teid->gtpu_addr_ipv4, buf, sizeof(buf));
-            printf("%s%s%s- UPF IPv4: %s\n", indent_str, indent_str, indent_str, buf);
+            printf("%s%s%s- Local GTP-U IPv4: %s\n", indent_str, indent_str, indent_str, buf);
         }
 
         if (pdi->sdf) {

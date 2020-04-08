@@ -285,7 +285,7 @@ static int genl_gtp5g_attr_list_cb(const struct nlmsghdr *nlh, void *data)
             if (hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_PEER_ADDR_IPV4]) {
                 ipv4->s_addr = mnl_attr_get_u32(hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_PEER_ADDR_IPV4]);
                 inet_ntop(AF_INET, ipv4, buf, sizeof(buf));
-                printf("%s%s%s- RAN IPv4: %s\n", indent_str, indent_str, indent_str, buf);
+                printf("%s%s%s- Next GTP-U IPv4: %s\n", indent_str, indent_str, indent_str, buf);
             }
 
             if (hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_PORT])
@@ -352,7 +352,7 @@ void gtp5g_print_far(struct gtp5g_far *far)
                 hdr_creation->teid);
 
             inet_ntop(AF_INET, &hdr_creation->peer_addr_ipv4, buf, sizeof(buf));
-            printf("%s%s%s- RAN IPv4: %s\n", indent_str, indent_str, indent_str, buf);
+            printf("%s%s%s- Next GTP-U IPv4: %s\n", indent_str, indent_str, indent_str, buf);
 
             printf("%s%s%s- Port: %u\n", indent_str, indent_str, indent_str,
                 hdr_creation->port);
