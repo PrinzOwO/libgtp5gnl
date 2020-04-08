@@ -135,7 +135,7 @@ static struct gtp5g_pdr *prepare_pdr(int argc, char *argv[])
                     goto err;
                 if ((ret = inet_pton(AF_INET, argv[optind], &(sa.sin_addr))) != 1)
                     goto err;
-                gtp5g_pdr_set_local_f_teid(pdr, htonl(atoi(optarg)), &(sa.sin_addr));
+                gtp5g_pdr_set_local_f_teid(pdr, atoi(optarg), &(sa.sin_addr));
                 break;
             case 'd': // --sdf-desp {description string}
                 gtp5g_pdr_set_sdf_filter_description(pdr, optarg);
@@ -342,8 +342,8 @@ static struct gtp5g_far *prepare_far(int argc, char *argv[])
                     goto err;
                 if ((ret = inet_pton(AF_INET, argv[optind + 1], &(sa.sin_addr))) != 1)
                     goto err;
-                gtp5g_far_set_outer_header_creation(far, atoi(optarg), htonl(atoi(argv[optind])),
-                                                    &(sa.sin_addr), htons(atoi(argv[optind + 2])));
+                gtp5g_far_set_outer_header_creation(far, atoi(optarg), atoi(argv[optind]),
+                                                    &(sa.sin_addr), atoi(argv[optind + 2]));
         }
     }
     return far;

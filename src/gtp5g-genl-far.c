@@ -280,7 +280,7 @@ static int genl_gtp5g_attr_list_cb(const struct nlmsghdr *nlh, void *data)
 
             if (hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_O_TEID])
                 printf("%s%s%s- Out Teid: %u\n", indent_str, indent_str, indent_str,
-                       ntohl(mnl_attr_get_u32(hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_O_TEID])));
+                       mnl_attr_get_u32(hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_O_TEID]));
 
             if (hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_PEER_ADDR_IPV4]) {
                 ipv4->s_addr = mnl_attr_get_u32(hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_PEER_ADDR_IPV4]);
@@ -290,7 +290,7 @@ static int genl_gtp5g_attr_list_cb(const struct nlmsghdr *nlh, void *data)
 
             if (hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_PORT])
                 printf("%s%s%s- Port: %u\n", indent_str, indent_str, indent_str,
-                       ntohs(mnl_attr_get_u16(hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_PORT])));
+                       mnl_attr_get_u16(hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_PORT]));
         }
     }
 
@@ -349,13 +349,13 @@ void gtp5g_print_far(struct gtp5g_far *far)
                 hdr_creation->desp);
             
             printf("%s%s%s- Out Teid: %u\n", indent_str, indent_str, indent_str,
-                ntohl(hdr_creation->teid));
+                hdr_creation->teid);
 
             inet_ntop(AF_INET, &hdr_creation->peer_addr_ipv4, buf, sizeof(buf));
             printf("%s%s%s- RAN IPv4: %s\n", indent_str, indent_str, indent_str, buf);
 
             printf("%s%s%s- Port: %u\n", indent_str, indent_str, indent_str,
-                ntohs(hdr_creation->port));
+                hdr_creation->port);
         }
     }
 
