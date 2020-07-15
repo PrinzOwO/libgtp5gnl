@@ -26,6 +26,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <regex.h>
+#include <limits.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
@@ -463,7 +464,7 @@ void gtp5g_pdr_set_sdf_filter_description(struct gtp5g_pdr *pdr, const char *rul
         rule->smask.s_addr = decimal_to_netmask(smask);
     }
     else
-        rule->smask.s_addr = 0;
+        rule->smask.s_addr = UINT_MAX;
 
     // Get SRC IP
     len = pmatch[4].rm_eo - pmatch[4].rm_so - len;
@@ -496,7 +497,7 @@ void gtp5g_pdr_set_sdf_filter_description(struct gtp5g_pdr *pdr, const char *rul
         rule->dmask.s_addr = decimal_to_netmask(dmask);
     }
     else
-        rule->dmask.s_addr = 0;
+        rule->dmask.s_addr = UINT_MAX;
 
     // Get Dest IP
     len = pmatch[8].rm_eo - pmatch[8].rm_so - len;
