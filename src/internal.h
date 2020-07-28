@@ -24,11 +24,17 @@ struct gtp5g_outer_header_creation {
     uint16_t port;
 };
 
+struct gtp5g_forwarding_policy {
+    int len;
+    char identifier[0xff + 1];
+};
+
 struct gtp5g_forwarding_parameter {
 //    uint8_t dest_int;
 //    char *network_instance;
     
     struct gtp5g_outer_header_creation *hdr_creation;
+    struct gtp5g_forwarding_policy *fwd_policy;
 };
 
 struct gtp5g_far {

@@ -109,6 +109,7 @@ gtp5g_struct_alloc_no_exp(sdf_filter_id, uint32_t);
 
 /* Nest in Forwarding Parameter */
 gtp5g_struct_alloc_no_exp(outer_header_creation, struct gtp5g_outer_header_creation);
+gtp5g_struct_alloc_no_exp(forwarding_policy, struct gtp5g_forwarding_policy);
 
 void gtp5g_dev_free(struct gtp5g_dev *dev)
 {
@@ -309,6 +310,13 @@ static inline void outer_hdr_creation_may_alloc(struct gtp5g_far *far)
     fwd_param_may_alloc(far);
     if (!far->fwd_param->hdr_creation)
         far->fwd_param->hdr_creation = gtp5g_outer_header_creation_alloc();
+}
+
+static inline void fwd_policy_may_alloc(struct gtp5g_far *far)
+{
+    fwd_param_may_alloc(far);
+    if (!far->fwd_param->fwd_policy)
+        far->fwd_param->fwd_policy = gtp5g_forwarding_policy_alloc();
 }
 
 
@@ -623,6 +631,15 @@ void gtp5g_far_set_outer_header_creation(struct gtp5g_far *far,
 }
 EXPORT_SYMBOL(gtp5g_far_set_outer_header_creation);
 
+void gtp5g_far_set_fwd_policy(struct gtp5g_far *far, char *str)
+{
+    fwd_policy_may_alloc(far);
+    struct gtp5g_forwarding_policy *fwd_policy = far->fwd_param->fwd_policy;
+    fwd_policy->len = strlen(str);
+    strcpy(fwd_policy->identifier, str);
+}
+EXPORT_SYMBOL(gtp5g_far_set_fwd_policy);
+
 uint32_t *gtp5g_far_get_id(struct gtp5g_far *far)
 {
     return &far->id;
@@ -652,16 +669,23 @@ EXPORT_SYMBOL(gtp5g_far_get_outer_header_creation_teid);
 struct in_addr *gtp5g_far_get_outer_header_creation_peer_addr_ipv4(struct gtp5g_far *far)
 {
     struct gtp5g_outer_header_creation *hdr_creation = (far->fwd_param ? far->fwd_param->hdr_creation : NULL);
-    return (hdr_creation ? &hdr_creation->peer_addr_ipv4 :NULL);
+    return (hdr_creation ? &hdr_creation->peer_addr_ipv4 : NULL);
 }
 EXPORT_SYMBOL(gtp5g_far_get_outer_header_creation_peer_addr_ipv4);
 
 uint16_t *gtp5g_far_get_outer_header_creation_port(struct gtp5g_far *far)
 {
     struct gtp5g_outer_header_creation *hdr_creation = (far->fwd_param ? far->fwd_param->hdr_creation : NULL);
-    return (hdr_creation ? &hdr_creation->port :NULL);
+    return (hdr_creation ? &hdr_creation->port : NULL);
 }
 EXPORT_SYMBOL(gtp5g_far_get_outer_header_creation_port);
+
+char *gtp5g_far_get_fwd_policy(struct gtp5g_far *far)
+{
+    struct gtp5g_forwarding_policy *fwd_policy = (far->fwd_param ? far->fwd_param->fwd_policy : NULL);
+    return (fwd_policy ? fwd_policy->identifier : NULL);
+}
+EXPORT_SYMBOL(gtp5g_far_get_fwd_policy);
 
 int *gtp5g_far_get_related_pdr_num(struct gtp5g_far *far)
 {

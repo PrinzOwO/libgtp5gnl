@@ -65,6 +65,7 @@ global:
   gtp5g_far_set_id;
   gtp5g_far_set_apply_action;
   gtp5g_far_set_outer_header_creation;
+  gtp5g_far_set_fwd_policy;
 
   gtp5g_far_get_id;
   gtp5g_far_get_apply_action;
@@ -72,6 +73,7 @@ global:
   gtp5g_far_get_outer_header_creation_teid;
   gtp5g_far_get_outer_header_creation_peer_addr_ipv4;
   gtp5g_far_get_outer_header_creation_port;
+  gtp5g_far_get_fwd_policy;
 
   gtp5g_far_get_related_pdr_num;
   gtp5g_far_get_related_pdr_list;
