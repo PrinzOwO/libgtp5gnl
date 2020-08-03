@@ -261,7 +261,7 @@ static int genl_gtp5g_attr_list_cb(const struct nlmsghdr *nlh, void *data)
     struct nlattr *far_tb[GTP5G_FAR_ATTR_MAX + 1] = {};
     struct nlattr *fwd_param_tb[GTP5G_FORWARDING_PARAMETER_ATTR_MAX + 1] = {};
     struct nlattr *hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_ATTR_MAX + 1] = {};
-    char buf[0xFF + 1];
+    char buf[MAX_LEN_OF_FORWARDING_POLICY_IDENTIFIER + 1];
     struct genlmsghdr *genl;
 
     const char *indent_str = "  ";
@@ -341,7 +341,7 @@ void gtp5g_print_far(struct gtp5g_far *far)
     struct gtp5g_outer_header_creation *hdr_creation;
 
     const char *indent_str = "  ";
-    char buf[0xFF + 1];
+    char buf[MAX_LEN_OF_FORWARDING_POLICY_IDENTIFIER + 1];
 
     if (!far) {
         perror("FAR is NULL");
@@ -395,7 +395,7 @@ static int genl_gtp5g_attr_cb(const struct nlmsghdr *nlh, void *data)
     struct genlmsghdr *genl;
     struct gtp5g_far *far;
     struct in_addr ipv4;
-    char buf[0xFF + 1];
+    char buf[MAX_LEN_OF_FORWARDING_POLICY_IDENTIFIER + 1];
 
     mnl_attr_parse(nlh, sizeof(*genl), genl_gtp5g_far_validate_cb, far_tb);
     far = *(struct gtp5g_far **) data = gtp5g_far_alloc();

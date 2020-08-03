@@ -633,6 +633,11 @@ EXPORT_SYMBOL(gtp5g_far_set_outer_header_creation);
 
 void gtp5g_far_set_fwd_policy(struct gtp5g_far *far, char *str)
 {
+    if (strlen(str) > MAX_LEN_OF_FORWARDING_POLICY_IDENTIFIER) {
+        perror("Forwarding parameters is too long");
+        return;
+    }
+
     fwd_policy_may_alloc(far);
     struct gtp5g_forwarding_policy *fwd_policy = far->fwd_param->fwd_policy;
     fwd_policy->len = strlen(str);

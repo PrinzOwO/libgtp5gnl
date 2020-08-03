@@ -25,8 +25,10 @@ struct gtp5g_outer_header_creation {
 };
 
 struct gtp5g_forwarding_policy {
+#define MAX_LEN_OF_FORWARDING_POLICY_IDENTIFIER 0xff
+
     int len;
-    char identifier[0xff + 1];
+    char identifier[MAX_LEN_OF_FORWARDING_POLICY_IDENTIFIER + 1];
 };
 
 struct gtp5g_forwarding_parameter {

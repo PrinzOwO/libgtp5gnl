@@ -349,8 +349,6 @@ static struct gtp5g_far *prepare_far(int argc, char *argv[])
                                                     &(sa.sin_addr), atoi(argv[optind + 2]));
                 break;
             case 'f': // --fwd-policy {mark set in iptable}
-                if (strlen(optarg) >= 0xff)
-                    goto err;
                 gtp5g_far_set_fwd_policy(far, optarg);
                 break;
         }
