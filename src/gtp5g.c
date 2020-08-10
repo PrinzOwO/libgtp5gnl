@@ -397,11 +397,11 @@ void gtp5g_pdr_set_sdf_filter_description(struct gtp5g_pdr *pdr, const char *rul
     char reg_act[] = "(permit)";
     char reg_direction[] = "(in|out)";
     char reg_proto[] = "(ip|[0-9]{1,3}})";
-    char reg_src_ip_mask[] = "(any|[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}(/[0-9]{1,5})?)";
-    char reg_dest_ip_mask[] = "(assigned|[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}(/[0-9]{1,5})?)";
+    char reg_src_ip_mask[] = "(any|assigned|[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}(/[0-9]{1,5})?)";
+    char reg_dest_ip_mask[] = "(any|assigned|[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}(/[0-9]{1,5})?)";
     char reg_port[] = "([ ][0-9]{1,5}([,-][0-9]{1,5})*)?";
 
-    char reg[0xff];
+    char reg[0xfff];
     sprintf(reg, "^%s %s %s from %s%s to %s%s$", reg_act, reg_direction, reg_proto,
                                                  reg_src_ip_mask, reg_port,
                                                  reg_dest_ip_mask, reg_port);
@@ -479,6 +479,10 @@ void gtp5g_pdr_set_sdf_filter_description(struct gtp5g_pdr *pdr, const char *rul
     strncpy(buf, rule_str + pmatch[4].rm_so, len); buf[len] = '\0';
     if (strcmp(buf, "any") == 0)
         inet_pton(AF_INET, "0.0.0.0", &rule->src);
+    else if (strcmp(buf, "assigned") == 0) {
+        perror("SDF filter description dest ip do NOT support assigned yet");
+        goto err;
+    }
     else if(inet_pton(AF_INET, buf, &rule->src) != 1) {
         perror("SDF filter description src ip is invalid");
         goto err;
@@ -510,8 +514,12 @@ void gtp5g_pdr_set_sdf_filter_description(struct gtp5g_pdr *pdr, const char *rul
     // Get Dest IP
     len = pmatch[8].rm_eo - pmatch[8].rm_so - len;
     strncpy(buf, rule_str + pmatch[8].rm_so, len); buf[len] = '\0';
-    if (strcmp(buf, "assigned") == 0)
+    if (strcmp(buf, "any") == 0)
         inet_pton(AF_INET, "0.0.0.0", &rule->dest);
+    else if (strcmp(buf, "assigned") == 0) {
+        perror("SDF filter description dest ip do NOT support assigned yet");
+        goto err;
+    }
     else if(inet_pton(AF_INET, buf, &rule->dest) != 1) {
         perror("SDF filter description dest ip is invalid");
         goto err;

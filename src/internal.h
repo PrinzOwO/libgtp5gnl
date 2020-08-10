@@ -60,7 +60,7 @@ struct ip_filter_rule {
     uint8_t direction;                  // in/out
     uint8_t proto;                      // number or "ip" which is not used for matching
     struct in_addr src, smask;          // ip addr or "any" -> 0.0.0.0
-    struct in_addr dest, dmask;         // ip addr or "assigned" -> 0.0.0.0
+    struct in_addr dest, dmask;         // ip addr or "any" -> 0.0.0.0
     int sport_num;
     uint32_t *sport_list;               // one value, range or not existed -> [0, 0]
     int dport_num;

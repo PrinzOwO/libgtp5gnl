@@ -526,7 +526,7 @@ static int genl_gtp5g_attr_list_cb(const struct nlmsghdr *nlh, void *data)
                 if (rule_tb[GTP5G_FLOW_DESCRIPTION_DEST_IPV4]) {
                     ipv4->s_addr = mnl_attr_get_u32(rule_tb[GTP5G_FLOW_DESCRIPTION_DEST_IPV4]);
                     if (ipv4->s_addr == 0)
-                        printf("assigned");
+                        printf("any");
                     else {
                         inet_ntop(AF_INET, ipv4, buf, sizeof(buf));
                         printf("%s", buf);
@@ -690,7 +690,7 @@ void gtp5g_print_pdr(struct gtp5g_pdr *pdr)
                 printf(" to ");
 
                 if (!rule->dest.s_addr)
-                    printf("assigned");
+                    printf("any");
                 else {
                     inet_ntop(AF_INET, &rule->dest, buf, sizeof(buf));
                     printf("%s", buf);
