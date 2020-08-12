@@ -477,8 +477,10 @@ void gtp5g_pdr_set_sdf_filter_description(struct gtp5g_pdr *pdr, const char *rul
     // Get SRC IP
     len = pmatch[4].rm_eo - pmatch[4].rm_so - len;
     strncpy(buf, rule_str + pmatch[4].rm_so, len); buf[len] = '\0';
-    if (strcmp(buf, "any") == 0)
+    if (strcmp(buf, "any") == 0) {
         inet_pton(AF_INET, "0.0.0.0", &rule->src);
+        rule->smask.s_addr = 0;
+    }
     else if (strcmp(buf, "assigned") == 0) {
         perror("SDF filter description dest ip do NOT support assigned yet");
         goto err;
@@ -514,8 +516,10 @@ void gtp5g_pdr_set_sdf_filter_description(struct gtp5g_pdr *pdr, const char *rul
     // Get Dest IP
     len = pmatch[8].rm_eo - pmatch[8].rm_so - len;
     strncpy(buf, rule_str + pmatch[8].rm_so, len); buf[len] = '\0';
-    if (strcmp(buf, "any") == 0)
+    if (strcmp(buf, "any") == 0) {
         inet_pton(AF_INET, "0.0.0.0", &rule->dest);
+        rule->dmask.s_addr = 0;
+    }
     else if (strcmp(buf, "assigned") == 0) {
         perror("SDF filter description dest ip do NOT support assigned yet");
         goto err;
