@@ -76,6 +76,11 @@ static void gtp5g_build_far_payload(struct nlmsghdr *nlh, struct gtp5g_dev *dev,
                              far->fwd_param->hdr_creation->port);
             mnl_attr_nest_end(nlh, hdr_creation_nest);
         }
+
+        // Level 3 : Forwarding Policy
+        if (far->fwd_param->fwd_policy)
+            mnl_attr_put(nlh, GTP5G_FORWARDING_PARAMETER_FORWARDING_POLICY, far->fwd_param->fwd_policy->len, far->fwd_param->fwd_policy->identifier);
+
         mnl_attr_nest_end(nlh, fwd_param_nest);
     }
 }
@@ -199,6 +204,9 @@ static int genl_gtp5g_forwarding_parameter_validate_cb(const struct nlattr *attr
              if (mnl_attr_validate(attr, MNL_TYPE_NESTED) < 0)
                 goto VALIDATE_FAIL;
             break;
+        case GTP5G_FORWARDING_PARAMETER_FORWARDING_POLICY:
+            // Octet string
+            break;
     default:
         break;
     }
@@ -253,7 +261,7 @@ static int genl_gtp5g_attr_list_cb(const struct nlmsghdr *nlh, void *data)
     struct nlattr *far_tb[GTP5G_FAR_ATTR_MAX + 1] = {};
     struct nlattr *fwd_param_tb[GTP5G_FORWARDING_PARAMETER_ATTR_MAX + 1] = {};
     struct nlattr *hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_ATTR_MAX + 1] = {};
-    char buf[INET_ADDRSTRLEN];
+    char buf[MAX_LEN_OF_FORWARDING_POLICY_IDENTIFIER + 1];
     struct genlmsghdr *genl;
 
     const char *indent_str = "  ";
@@ -280,17 +288,22 @@ static int genl_gtp5g_attr_list_cb(const struct nlmsghdr *nlh, void *data)
 
             if (hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_O_TEID])
                 printf("%s%s%s- Out Teid: %u\n", indent_str, indent_str, indent_str,
-                       ntohl(mnl_attr_get_u32(hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_O_TEID])));
+                       mnl_attr_get_u32(hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_O_TEID]));
 
             if (hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_PEER_ADDR_IPV4]) {
                 ipv4->s_addr = mnl_attr_get_u32(hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_PEER_ADDR_IPV4]);
                 inet_ntop(AF_INET, ipv4, buf, sizeof(buf));
-                printf("%s%s%s- RAN IPv4: %s\n", indent_str, indent_str, indent_str, buf);
+                printf("%s%s%s- Next GTP-U IPv4: %s\n", indent_str, indent_str, indent_str, buf);
             }
 
             if (hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_PORT])
                 printf("%s%s%s- Port: %u\n", indent_str, indent_str, indent_str,
-                       ntohs(mnl_attr_get_u16(hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_PORT])));
+                       mnl_attr_get_u16(hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_PORT]));
+        }
+
+        if (fwd_param_tb[GTP5G_FORWARDING_PARAMETER_FORWARDING_POLICY]) {
+            strncpy(buf, mnl_attr_get_payload(fwd_param_tb[GTP5G_FORWARDING_PARAMETER_FORWARDING_POLICY]), mnl_attr_get_payload_len(fwd_param_tb[GTP5G_FORWARDING_PARAMETER_FORWARDING_POLICY]));
+            printf("%s%s- Forwarding Policy: %s\n", indent_str, indent_str, buf);
         }
     }
 
@@ -328,7 +341,7 @@ void gtp5g_print_far(struct gtp5g_far *far)
     struct gtp5g_outer_header_creation *hdr_creation;
 
     const char *indent_str = "  ";
-    char buf[INET_ADDRSTRLEN];
+    char buf[MAX_LEN_OF_FORWARDING_POLICY_IDENTIFIER + 1];
 
     if (!far) {
         perror("FAR is NULL");
@@ -349,13 +362,18 @@ void gtp5g_print_far(struct gtp5g_far *far)
                 hdr_creation->desp);
             
             printf("%s%s%s- Out Teid: %u\n", indent_str, indent_str, indent_str,
-                ntohl(hdr_creation->teid));
+                hdr_creation->teid);
 
             inet_ntop(AF_INET, &hdr_creation->peer_addr_ipv4, buf, sizeof(buf));
-            printf("%s%s%s- RAN IPv4: %s\n", indent_str, indent_str, indent_str, buf);
+            printf("%s%s%s- Next GTP-U IPv4: %s\n", indent_str, indent_str, indent_str, buf);
 
             printf("%s%s%s- Port: %u\n", indent_str, indent_str, indent_str,
-                ntohs(hdr_creation->port));
+                hdr_creation->port);
+        }
+
+        if (fwd_param->fwd_policy) {
+            strncpy(buf, fwd_param->fwd_policy->identifier, fwd_param->fwd_policy->len);
+            printf("%s%s- Forwarding Policy: %s\n", indent_str, indent_str, buf);
         }
     }
 
@@ -377,6 +395,7 @@ static int genl_gtp5g_attr_cb(const struct nlmsghdr *nlh, void *data)
     struct genlmsghdr *genl;
     struct gtp5g_far *far;
     struct in_addr ipv4;
+    char buf[MAX_LEN_OF_FORWARDING_POLICY_IDENTIFIER + 1];
 
     mnl_attr_parse(nlh, sizeof(*genl), genl_gtp5g_far_validate_cb, far_tb);
     far = *(struct gtp5g_far **) data = gtp5g_far_alloc();
@@ -398,6 +417,11 @@ static int genl_gtp5g_attr_cb(const struct nlmsghdr *nlh, void *data)
                 mnl_attr_get_u16(hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_DESCRIPTION]),
                 mnl_attr_get_u32(hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_O_TEID]),
                 &ipv4, mnl_attr_get_u16(hdr_creation_tb[GTP5G_OUTER_HEADER_CREATION_PORT]));
+        }
+
+        if (fwd_param_tb[GTP5G_FORWARDING_PARAMETER_FORWARDING_POLICY]) {
+            strncpy(buf, mnl_attr_get_payload(fwd_param_tb[GTP5G_FORWARDING_PARAMETER_FORWARDING_POLICY]), mnl_attr_get_payload_len(fwd_param_tb[GTP5G_FORWARDING_PARAMETER_FORWARDING_POLICY]));
+            gtp5g_far_set_fwd_policy(far, buf);
         }
     }
 

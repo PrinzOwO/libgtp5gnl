@@ -447,12 +447,12 @@ static int genl_gtp5g_attr_list_cb(const struct nlmsghdr *nlh, void *data)
             printf("%s%s[Local F-Teid Info]\n", indent_str, indent_str);
             if (f_teid_tb[GTP5G_F_TEID_I_TEID])
                 printf("%s%s%s- In Teid: %u\n", indent_str, indent_str, indent_str,
-                       ntohl(mnl_attr_get_u32(f_teid_tb[GTP5G_F_TEID_I_TEID])));
+                       mnl_attr_get_u32(f_teid_tb[GTP5G_F_TEID_I_TEID]));
 
             if (f_teid_tb[GTP5G_F_TEID_GTPU_ADDR_IPV4]) {
                 ipv4->s_addr = mnl_attr_get_u32(f_teid_tb[GTP5G_F_TEID_GTPU_ADDR_IPV4]);
                 inet_ntop(AF_INET, ipv4, buf, sizeof(buf));
-                printf("%s%s%s- UPF IPv4: %s\n", indent_str, indent_str, indent_str, buf);
+                printf("%s%s%s- Local GTP-U IPv4: %s\n", indent_str, indent_str, indent_str, buf);
             }
         }
 
@@ -526,7 +526,7 @@ static int genl_gtp5g_attr_list_cb(const struct nlmsghdr *nlh, void *data)
                 if (rule_tb[GTP5G_FLOW_DESCRIPTION_DEST_IPV4]) {
                     ipv4->s_addr = mnl_attr_get_u32(rule_tb[GTP5G_FLOW_DESCRIPTION_DEST_IPV4]);
                     if (ipv4->s_addr == 0)
-                        printf("assigned");
+                        printf("any");
                     else {
                         inet_ntop(AF_INET, ipv4, buf, sizeof(buf));
                         printf("%s", buf);
@@ -631,10 +631,10 @@ void gtp5g_print_pdr(struct gtp5g_pdr *pdr)
             f_teid = pdi->f_teid;
             printf("%s%s[Local F-Teid Info]\n", indent_str, indent_str);
 
-            printf("%s%s%s- In Teid: %u\n", indent_str, indent_str, indent_str, ntohl(f_teid->teid));
+            printf("%s%s%s- In Teid: %u\n", indent_str, indent_str, indent_str, f_teid->teid);
 
             inet_ntop(AF_INET, &f_teid->gtpu_addr_ipv4, buf, sizeof(buf));
-            printf("%s%s%s- UPF IPv4: %s\n", indent_str, indent_str, indent_str, buf);
+            printf("%s%s%s- Local GTP-U IPv4: %s\n", indent_str, indent_str, indent_str, buf);
         }
 
         if (pdi->sdf) {
@@ -690,7 +690,7 @@ void gtp5g_print_pdr(struct gtp5g_pdr *pdr)
                 printf(" to ");
 
                 if (!rule->dest.s_addr)
-                    printf("assigned");
+                    printf("any");
                 else {
                     inet_ntop(AF_INET, &rule->dest, buf, sizeof(buf));
                     printf("%s", buf);

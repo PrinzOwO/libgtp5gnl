@@ -51,6 +51,7 @@ struct in_addr *gtp5g_pdr_get_local_f_teid_gtpu_addr_ipv4(struct gtp5g_pdr *pdr)
 void gtp5g_far_set_id(struct gtp5g_far *far, uint32_t id);
 void gtp5g_far_set_apply_action(struct gtp5g_far *far, uint8_t apply_action);
 void gtp5g_far_set_outer_header_creation(struct gtp5g_far *far, uint16_t desp, uint32_t teid, struct in_addr *peer_addr_ipv4, uint16_t port);
+void gtp5g_far_set_fwd_policy(struct gtp5g_far *far, char *str);
 
 uint32_t *gtp5g_far_get_id(struct gtp5g_far *far);
 uint8_t *gtp5g_far_get_apply_action(struct gtp5g_far *far);
@@ -58,6 +59,7 @@ uint16_t *gtp5g_far_get_outer_header_creation_description(struct gtp5g_far *far)
 uint32_t *gtp5g_far_get_outer_header_creation_teid(struct gtp5g_far *far);
 struct in_addr *gtp5g_far_get_outer_header_creation_peer_addr_ipv4(struct gtp5g_far *far);
 uint16_t *gtp5g_far_get_outer_header_creation_port(struct gtp5g_far *far);
+char *gtp5g_far_get_fwd_policy(struct gtp5g_far *far);
 
 int *gtp5g_far_get_related_pdr_num(struct gtp5g_far *far);
 uint16_t *gtp5g_far_get_related_pdr_list(struct gtp5g_far *far);

@@ -73,6 +73,8 @@ static void add_usage(const char *name)
     printf("FAR OPTIONS\n");
     printf("\t--action <apply-action>\n");
     printf("\t--hdr-creation <description> <o-teid> <peer-ipv4> <peer-port>\n");
+    printf("\t--fwd-policy <mark set in iptable>\n");
+    printf("\t\tSet mark into packet and exec Linux routing>\n");
 }
 
 static inline int check_opts_invalid(int argc, int now)
@@ -135,7 +137,7 @@ static struct gtp5g_pdr *prepare_pdr(int argc, char *argv[])
                     goto err;
                 if ((ret = inet_pton(AF_INET, argv[optind], &(sa.sin_addr))) != 1)
                     goto err;
-                gtp5g_pdr_set_local_f_teid(pdr, htonl(atoi(optarg)), &(sa.sin_addr));
+                gtp5g_pdr_set_local_f_teid(pdr, atoi(optarg), &(sa.sin_addr));
                 break;
             case 'd': // --sdf-desp {description string}
                 gtp5g_pdr_set_sdf_filter_description(pdr, optarg);
@@ -315,6 +317,7 @@ static struct option long_far_options[] =
 {
     {"action", required_argument, NULL, 'a'},
     {"hdr-creation", required_argument, NULL, 'h'},
+    {"fwd-policy", required_argument, NULL, 'f'}
 };
 
 static struct gtp5g_far *prepare_far(int argc, char *argv[])
@@ -342,8 +345,12 @@ static struct gtp5g_far *prepare_far(int argc, char *argv[])
                     goto err;
                 if ((ret = inet_pton(AF_INET, argv[optind + 1], &(sa.sin_addr))) != 1)
                     goto err;
-                gtp5g_far_set_outer_header_creation(far, atoi(optarg), htonl(atoi(argv[optind])),
-                                                    &(sa.sin_addr), htons(atoi(argv[optind + 2])));
+                gtp5g_far_set_outer_header_creation(far, atoi(optarg), atoi(argv[optind]),
+                                                    &(sa.sin_addr), atoi(argv[optind + 2]));
+                break;
+            case 'f': // --fwd-policy {mark set in iptable}
+                gtp5g_far_set_fwd_policy(far, optarg);
+                break;
         }
     }
     return far;

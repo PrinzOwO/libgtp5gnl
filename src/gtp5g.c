@@ -109,6 +109,7 @@ gtp5g_struct_alloc_no_exp(sdf_filter_id, uint32_t);
 
 /* Nest in Forwarding Parameter */
 gtp5g_struct_alloc_no_exp(outer_header_creation, struct gtp5g_outer_header_creation);
+gtp5g_struct_alloc_no_exp(forwarding_policy, struct gtp5g_forwarding_policy);
 
 void gtp5g_dev_free(struct gtp5g_dev *dev)
 {
@@ -311,6 +312,13 @@ static inline void outer_hdr_creation_may_alloc(struct gtp5g_far *far)
         far->fwd_param->hdr_creation = gtp5g_outer_header_creation_alloc();
 }
 
+static inline void fwd_policy_may_alloc(struct gtp5g_far *far)
+{
+    fwd_param_may_alloc(far);
+    if (!far->fwd_param->fwd_policy)
+        far->fwd_param->fwd_policy = gtp5g_forwarding_policy_alloc();
+}
+
 
 void gtp5g_dev_set_ifns(struct gtp5g_dev *dev, int ifns)
 {
@@ -389,11 +397,11 @@ void gtp5g_pdr_set_sdf_filter_description(struct gtp5g_pdr *pdr, const char *rul
     char reg_act[] = "(permit)";
     char reg_direction[] = "(in|out)";
     char reg_proto[] = "(ip|[0-9]{1,3}})";
-    char reg_src_ip_mask[] = "(any|[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}(/[0-9]{1,5})?)";
-    char reg_dest_ip_mask[] = "(assigned|[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}(/[0-9]{1,5})?)";
+    char reg_src_ip_mask[] = "(any|assigned|[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}(/[0-9]{1,5})?)";
+    char reg_dest_ip_mask[] = "(any|assigned|[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}(/[0-9]{1,5})?)";
     char reg_port[] = "([ ][0-9]{1,5}([,-][0-9]{1,5})*)?";
 
-    char reg[0xff];
+    char reg[0xfff];
     sprintf(reg, "^%s %s %s from %s%s to %s%s$", reg_act, reg_direction, reg_proto,
                                                  reg_src_ip_mask, reg_port,
                                                  reg_dest_ip_mask, reg_port);
@@ -469,8 +477,14 @@ void gtp5g_pdr_set_sdf_filter_description(struct gtp5g_pdr *pdr, const char *rul
     // Get SRC IP
     len = pmatch[4].rm_eo - pmatch[4].rm_so - len;
     strncpy(buf, rule_str + pmatch[4].rm_so, len); buf[len] = '\0';
-    if (strcmp(buf, "any") == 0)
+    if (strcmp(buf, "any") == 0) {
         inet_pton(AF_INET, "0.0.0.0", &rule->src);
+        rule->smask.s_addr = 0;
+    }
+    else if (strcmp(buf, "assigned") == 0) {
+        perror("SDF filter description dest ip do NOT support assigned yet");
+        goto err;
+    }
     else if(inet_pton(AF_INET, buf, &rule->src) != 1) {
         perror("SDF filter description src ip is invalid");
         goto err;
@@ -502,8 +516,14 @@ void gtp5g_pdr_set_sdf_filter_description(struct gtp5g_pdr *pdr, const char *rul
     // Get Dest IP
     len = pmatch[8].rm_eo - pmatch[8].rm_so - len;
     strncpy(buf, rule_str + pmatch[8].rm_so, len); buf[len] = '\0';
-    if (strcmp(buf, "assigned") == 0)
+    if (strcmp(buf, "any") == 0) {
         inet_pton(AF_INET, "0.0.0.0", &rule->dest);
+        rule->dmask.s_addr = 0;
+    }
+    else if (strcmp(buf, "assigned") == 0) {
+        perror("SDF filter description dest ip do NOT support assigned yet");
+        goto err;
+    }
     else if(inet_pton(AF_INET, buf, &rule->dest) != 1) {
         perror("SDF filter description dest ip is invalid");
         goto err;
@@ -623,6 +643,20 @@ void gtp5g_far_set_outer_header_creation(struct gtp5g_far *far,
 }
 EXPORT_SYMBOL(gtp5g_far_set_outer_header_creation);
 
+void gtp5g_far_set_fwd_policy(struct gtp5g_far *far, char *str)
+{
+    if (strlen(str) > MAX_LEN_OF_FORWARDING_POLICY_IDENTIFIER) {
+        perror("Forwarding parameters is too long");
+        return;
+    }
+
+    fwd_policy_may_alloc(far);
+    struct gtp5g_forwarding_policy *fwd_policy = far->fwd_param->fwd_policy;
+    fwd_policy->len = strlen(str);
+    strcpy(fwd_policy->identifier, str);
+}
+EXPORT_SYMBOL(gtp5g_far_set_fwd_policy);
+
 uint32_t *gtp5g_far_get_id(struct gtp5g_far *far)
 {
     return &far->id;
@@ -652,16 +686,23 @@ EXPORT_SYMBOL(gtp5g_far_get_outer_header_creation_teid);
 struct in_addr *gtp5g_far_get_outer_header_creation_peer_addr_ipv4(struct gtp5g_far *far)
 {
     struct gtp5g_outer_header_creation *hdr_creation = (far->fwd_param ? far->fwd_param->hdr_creation : NULL);
-    return (hdr_creation ? &hdr_creation->peer_addr_ipv4 :NULL);
+    return (hdr_creation ? &hdr_creation->peer_addr_ipv4 : NULL);
 }
 EXPORT_SYMBOL(gtp5g_far_get_outer_header_creation_peer_addr_ipv4);
 
 uint16_t *gtp5g_far_get_outer_header_creation_port(struct gtp5g_far *far)
 {
     struct gtp5g_outer_header_creation *hdr_creation = (far->fwd_param ? far->fwd_param->hdr_creation : NULL);
-    return (hdr_creation ? &hdr_creation->port :NULL);
+    return (hdr_creation ? &hdr_creation->port : NULL);
 }
 EXPORT_SYMBOL(gtp5g_far_get_outer_header_creation_port);
+
+char *gtp5g_far_get_fwd_policy(struct gtp5g_far *far)
+{
+    struct gtp5g_forwarding_policy *fwd_policy = (far->fwd_param ? far->fwd_param->fwd_policy : NULL);
+    return (fwd_policy ? fwd_policy->identifier : NULL);
+}
+EXPORT_SYMBOL(gtp5g_far_get_fwd_policy);
 
 int *gtp5g_far_get_related_pdr_num(struct gtp5g_far *far)
 {

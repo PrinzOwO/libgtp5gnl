@@ -24,11 +24,19 @@ struct gtp5g_outer_header_creation {
     uint16_t port;
 };
 
+struct gtp5g_forwarding_policy {
+#define MAX_LEN_OF_FORWARDING_POLICY_IDENTIFIER 0xff
+
+    int len;
+    char identifier[MAX_LEN_OF_FORWARDING_POLICY_IDENTIFIER + 1];
+};
+
 struct gtp5g_forwarding_parameter {
 //    uint8_t dest_int;
 //    char *network_instance;
     
     struct gtp5g_outer_header_creation *hdr_creation;
+    struct gtp5g_forwarding_policy *fwd_policy;
 };
 
 struct gtp5g_far {
@@ -52,7 +60,7 @@ struct ip_filter_rule {
     uint8_t direction;                  // in/out
     uint8_t proto;                      // number or "ip" which is not used for matching
     struct in_addr src, smask;          // ip addr or "any" -> 0.0.0.0
-    struct in_addr dest, dmask;         // ip addr or "assigned" -> 0.0.0.0
+    struct in_addr dest, dmask;         // ip addr or "any" -> 0.0.0.0
     int sport_num;
     uint32_t *sport_list;               // one value, range or not existed -> [0, 0]
     int dport_num;
