@@ -10,6 +10,14 @@ libgtp5gnl is a project based on [libgtpnl](https://github.com/osmocom/libgtpnl)
 which is part of the [Osmocom](https://osmocom.org/) Open Source Mobile
 Communications project.
 
+## Note:1
+The latest implementation of gtp5g and libgtp5gnl is in
+
+https://github.com/free5gc/gtp5g
+
+https://github.com/free5gc/libgtp5gnl
+
+
 ## Usage
 ### Compile
 ```
